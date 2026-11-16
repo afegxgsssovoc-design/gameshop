@@ -71,6 +71,11 @@
   .st{padding:3px 10px;border-radius:12px;font-size:12px;background:#3a2f00;color:var(--yellow)}
   .st.ok{background:#0f3a1c;color:#4ade80}
   .muted{color:var(--muted)}
+  .mitem{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid #2a2a30;border-radius:14px;padding:18px 16px;margin-bottom:12px;cursor:pointer;font-size:16px}
+  .mitem:active{border-color:var(--red);transform:scale(.98)}
+  .mitem .mi{font-size:26px}
+  .mitem b{flex:1}
+  .mitem span:last-child{color:var(--red);font-size:24px}
 </style>
 </head>
 <body>
@@ -128,13 +133,16 @@
 <!-- หน้าเลือกแพ็กเกจ -->
 <div id="v-game" class="hidden">
   <header>
-    <button class="btn-ghost" style="width:auto;margin:0;padding:8px 14px;font-size:14px" onclick="go('v-home')">← กลับ</button>
+    <button class="btn-ghost" style="width:auto;margin:0;padding:8px 14px;font-size:14px" onclick="backGame()">← กลับ</button>
     <div class="wallet">💰 <span id="g-money">0</span> กีบ</div>
   </header>
   <main>
     <div class="gtitle"><img id="g-img" alt=""><h2 id="g-name"></h2></div>
-    <div class="sec" style="margin-top:0">เลือก<span>แพ็กเกจ</span></div>
-    <div id="g-pkgs"></div>
+    <div id="g-menu"></div>
+    <div id="g-sec" class="hidden">
+      <div class="sec" style="margin-top:0" id="g-cat"></div>
+      <div id="g-pkgs"></div>
+    </div>
     <div class="obox hidden" id="o-box">
       <p>แพ็กเกจที่เลือก: <b id="o-pkg" style="color:#fff"></b></p>
       <input id="o-acc" placeholder="ชื่อผู้ใช้ในเกม (Roblox username)">
@@ -310,13 +318,22 @@ const CONTACT = "ติดต่อร้านเพื่อโอนเงิ
 const GAMES = [
   { id:'blox', name:'Blox Fruits',
     img:'https://www.image2url.com/r2/default/images/1794833988371-bf179a6a-7d80-44d9-87a7-3aa52733c682.png',
-    packages:[
-      { name:'ตัวอย่างแพ็กเกจ 1', price:50000 },
-      { name:'ตัวอย่างแพ็กเกจ 2', price:100000 },
-      { name:'ตัวอย่างแพ็กเกจ 3', price:200000 }
+    cats:[
+      { name:'ซื้อ ID Blox Fruits', icon:'🪪', packages:[
+        { name:'ตัวอย่าง ID 1', price:100000 },
+        { name:'ตัวอย่าง ID 2', price:200000 } ] },
+      { name:'ซื้อผล', icon:'🍎', packages:[
+        { name:'ตัวอย่างผล 1', price:50000 },
+        { name:'ตัวอย่างผล 2', price:100000 } ] },
+      { name:'ผลถาวร', icon:'♾️', packages:[
+        { name:'ตัวอย่างผลถาวร 1', price:150000 },
+        { name:'ตัวอย่างผลถาวร 2', price:300000 } ] },
+      { name:'เผ่า', icon:'🧬', packages:[
+        { name:'ตัวอย่างเผ่า 1', price:80000 },
+        { name:'ตัวอย่างเผ่า 2', price:160000 } ] }
     ] }
 ];
-let curGame = null, curPkg = null;
+let curGame = null, curCat = null, curPkg = null;
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt = n => Number(n).toLocaleString('en-US');
 
@@ -326,17 +343,36 @@ function renderGames(){
 }
 
 window.openGame = function(id){
-  curGame = GAMES.find(g => g.id === id); curPkg = null;
+  curGame = GAMES.find(g => g.id === id); curCat = null; curPkg = null;
   $('g-img').src = curGame.img; $('g-name').textContent = curGame.name;
   $('o-box').classList.add('hidden'); $('o-err').textContent=''; $('o-acc').value='';
-  $('g-pkgs').innerHTML = curGame.packages.map((p,i) =>
-    `<div class="pkg" id="pk${i}" onclick="pickPkg(${i})"><b>${esc(p.name)}</b><span class="pr">${fmt(p.price)} กีบ</span></div>`).join('');
+  $('g-menu').innerHTML = curGame.cats.map((c,i) =>
+    `<div class="mitem" onclick="openCat(${i})"><span class="mi">${c.icon}</span><b>${esc(c.name)}</b><span>›</span></div>`).join('');
+  $('g-menu').classList.remove('hidden'); $('g-sec').classList.add('hidden');
   go('v-game');
 };
 
+window.openCat = function(i){
+  curCat = curGame.cats[i]; curPkg = null;
+  $('g-cat').innerHTML = esc(curCat.name);
+  $('g-pkgs').innerHTML = curCat.packages.map((p,k) =>
+    `<div class="pkg" id="pk${k}" onclick="pickPkg(${k})"><b>${esc(p.name)}</b><span class="pr">${fmt(p.price)} กีบ</span></div>`).join('');
+  $('o-box').classList.add('hidden'); $('o-err').textContent=''; $('o-acc').value='';
+  $('g-menu').classList.add('hidden'); $('g-sec').classList.remove('hidden');
+  window.scrollTo(0,0);
+};
+
+window.backGame = function(){
+  if(curCat){
+    curCat = null; curPkg = null;
+    $('g-sec').classList.add('hidden'); $('o-box').classList.add('hidden');
+    $('g-menu').classList.remove('hidden');
+  } else go('v-home');
+};
+
 window.pickPkg = function(i){
-  curPkg = curGame.packages[i];
-  curGame.packages.forEach((_,k) => $('pk'+k).classList.toggle('sel', k===i));
+  curPkg = curCat.packages[i];
+  curCat.packages.forEach((_,k) => $('pk'+k).classList.toggle('sel', k===i));
   $('o-pkg').textContent = `${curPkg.name} (${fmt(curPkg.price)} กีบ)`;
   $('o-box').classList.remove('hidden');
   $('o-box').scrollIntoView({behavior:'smooth'});
@@ -350,7 +386,7 @@ window.submitOrder = async function(){
   try{
     await addDoc(collection(db,'orders'), {
       uid: auth.currentUser.uid, email: profile.email,
-      game: curGame.name, package: curPkg.name, price: curPkg.price,
+      game: curGame.name + ' - ' + curCat.name, package: curPkg.name, price: curPkg.price,
       account: acc, status: 'รอดำเนินการ', createdAt: serverTimestamp()
     });
     alert('สั่งซื้อสำเร็จ! 🎉\n' + CONTACT);
