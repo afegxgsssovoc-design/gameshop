@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ร้านเติมเกม</title>
+<style>
+  :root{--red:#e11d2e;--yellow:#ffc400;--bg:#0b0b0d;--card:#17171b;--text:#f4f4f5;--muted:#9a9aa3}
+  *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,"Noto Sans Thai",sans-serif}
+  body{background:var(--bg);color:var(--text);min-height:100vh}
+  .hidden{display:none!important}
+  .center{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+  .box{width:100%;max-width:380px;background:var(--card);border:1px solid #2a2a30;border-radius:18px;padding:26px;box-shadow:0 10px 40px rgba(225,29,46,.15)}
+  h1{font-size:24px;text-align:center;margin-bottom:6px}
+  .sub{text-align:center;color:var(--muted);font-size:14px;margin-bottom:20px}
+  input{width:100%;padding:13px 14px;margin-bottom:12px;border-radius:10px;border:1px solid #33333b;background:#0f0f12;color:var(--text);font-size:16px}
+  input:focus{outline:2px solid var(--red);border-color:transparent}
+  button{width:100%;padding:13px;border:0;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;color:#fff}
+  button:disabled{opacity:.6}
+  .btn-main{background:var(--red)}
+  .btn-signup{background:linear-gradient(90deg,var(--red),var(--yellow));margin-top:10px;color:#1a1a1a}
+  .btn-ghost{background:#26262c;margin-top:10px}
+  .err{color:#ff6b6b;font-size:14px;text-align:center;min-height:20px;margin-bottom:8px}
+  .icon{display:inline-block;margin-right:6px}
+  #loading{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:99;color:var(--muted)}
+
+  header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:linear-gradient(90deg,#000,#3a0a10);border-bottom:2px solid var(--red);position:sticky;top:0;z-index:5}
+  .logo{font-weight:800;font-size:18px}
+  .logo span{color:var(--red)}
+  .right{display:flex;align-items:center;gap:10px}
+  .wallet{background:#000;border:1px solid var(--red);border-radius:20px;padding:6px 12px;font-size:14px;font-weight:700;color:var(--yellow)}
+  .avatar{width:38px;height:38px;border-radius:50%;object-fit:cover;background:#333;border:2px solid var(--red);cursor:pointer}
+  main{padding:20px 16px;max-width:600px;margin:0 auto}
+  .welcome{background:var(--card);border:1px solid #2a2a30;border-radius:16px;padding:20px;text-align:center}
+  .welcome h2{margin-bottom:6px}
+  .welcome p{color:var(--muted);font-size:14px}
+
+  .cover{height:170px;background:linear-gradient(135deg,#000,var(--red));background-size:cover;background-position:center;position:relative}
+  .cover label.edit{position:absolute;right:10px;bottom:10px;background:rgba(0,0,0,.65);padding:7px 12px;border-radius:20px;font-size:13px;cursor:pointer}
+  .pf{max-width:600px;margin:0 auto;padding:0 16px 30px;text-align:center}
+  .pf-avatar{width:110px;height:110px;border-radius:50%;object-fit:cover;background:#333;border:4px solid var(--bg);outline:3px solid var(--red);margin-top:-55px;position:relative}
+  .pf-name{font-size:22px;font-weight:800;margin-top:10px}
+  .pf-email{color:var(--muted);font-size:14px;margin-bottom:16px}
+  .pf-actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:16px}
+  .pf-actions label,.pf-actions button{width:auto;padding:9px 14px;font-size:14px;border-radius:20px;background:#26262c;cursor:pointer;color:#fff;font-weight:600;border:0}
+  .namebox{background:var(--card);border:1px solid #2a2a30;border-radius:14px;padding:16px;text-align:left}
+  .namebox label{font-size:13px;color:var(--muted)}
+  .namebox input{margin:8px 0}
+  input[type=file]{display:none}
+
+  .sec{font-size:18px;font-weight:800;margin:22px 0 12px}
+  .sec span{color:var(--red)}
+  .games{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  .gcard{background:var(--card);border:1px solid #2a2a30;border-radius:14px;overflow:hidden;cursor:pointer;text-align:center;transition:.15s}
+  .gcard:active{transform:scale(.97);border-color:var(--red)}
+  .gcard img{width:100%;aspect-ratio:1;object-fit:cover;display:block;background:#222}
+  .gcard div{padding:10px;font-weight:700;font-size:15px}
+  .quick{display:flex;gap:10px;margin-top:14px}
+  .quick button{background:#26262c;font-size:14px;padding:11px}
+  .gtitle{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+  .gtitle img{width:64px;height:64px;border-radius:14px;object-fit:cover;border:2px solid var(--red)}
+  .gtitle h2{font-size:20px}
+  .pkg{display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid #2a2a30;border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer}
+  .pkg.sel{border-color:var(--red);box-shadow:0 0 0 2px rgba(225,29,46,.35)}
+  .pkg b{font-size:16px}
+  .pkg .pr{color:var(--yellow);font-weight:800}
+  .obox{background:var(--card);border:1px solid var(--red);border-radius:14px;padding:16px;margin-top:14px}
+  .obox p{font-size:14px;color:var(--muted);margin-bottom:10px}
+  .ord{background:var(--card);border:1px solid #2a2a30;border-radius:12px;padding:14px;margin-bottom:10px;font-size:14px}
+  .ord .top{display:flex;justify-content:space-between;margin-bottom:6px;font-weight:700}
+  .st{padding:3px 10px;border-radius:12px;font-size:12px;background:#3a2f00;color:var(--yellow)}
+  .st.ok{background:#0f3a1c;color:#4ade80}
+  .muted{color:var(--muted)}
+</style>
+</head>
+<body>
+
+<div id="loading">กำลังโหลด...</div>
+
+<!-- 1. หน้าเข้าสู่ระบบ -->
+<div id="v-login" class="center hidden">
+  <div class="box">
+    <h1>🎮 ร้านเติมเกม</h1>
+    <p class="sub">เข้าสู่ระบบ</p>
+    <input id="l-user" type="email" placeholder="อีเมล" autocomplete="username">
+    <input id="l-pass" type="password" placeholder="รหัสผ่าน" autocomplete="current-password">
+    <div class="err" id="l-err"></div>
+    <button class="btn-main" id="l-btn" onclick="doLogin()">เข้าสู่ระบบ</button>
+    <button class="btn-signup" onclick="go('v-signup')"><span class="icon">👤➕</span>สมัครสมาชิก</button>
+  </div>
+</div>
+
+<!-- 2. หน้าสมัครสมาชิก -->
+<div id="v-signup" class="center hidden">
+  <div class="box">
+    <h1>👤➕ สมัครสมาชิก</h1>
+    <p class="sub">กรอกข้อมูลของคุณ</p>
+    <input id="s-name" placeholder="ชื่อ" autocomplete="nickname">
+    <input id="s-email" type="email" placeholder="อีเมล" autocomplete="email">
+    <input id="s-pass1" type="password" placeholder="รหัสผ่าน" autocomplete="new-password">
+    <input id="s-pass2" type="password" placeholder="ยืนยันรหัสผ่านอีกครั้ง" autocomplete="new-password">
+    <div class="err" id="s-err"></div>
+    <button class="btn-signup" id="s-btn" onclick="doSignup()">สมัครสมาชิก</button>
+    <button class="btn-ghost" onclick="go('v-login')">← กลับไปเข้าสู่ระบบ</button>
+  </div>
+</div>
+
+<!-- 3. หน้าหลัก -->
+<div id="v-home" class="hidden">
+  <header>
+    <div class="logo">GAME<span>SHOP</span></div>
+    <div class="right">
+      <div class="wallet">💰 <span id="h-money">0</span> กีบ</div>
+      <img class="avatar" id="h-avatar" onclick="go('v-profile')" alt="โปรไฟล์">
+    </div>
+  </header>
+  <main>
+    <div class="welcome">
+      <h2>สวัสดี <span id="h-name"></span> 👋</h2>
+      <p>ยินดีต้อนรับสู่ร้านเติมเกม</p>
+    </div>
+    <div class="sec">🎮 เลือก<span>เกม</span></div>
+    <div class="games" id="games"></div>
+    <div class="quick"><button onclick="openOrders()">📋 ประวัติคำสั่งซื้อ</button></div>
+  </main>
+</div>
+
+<!-- หน้าเลือกแพ็กเกจ -->
+<div id="v-game" class="hidden">
+  <header>
+    <button class="btn-ghost" style="width:auto;margin:0;padding:8px 14px;font-size:14px" onclick="go('v-home')">← กลับ</button>
+    <div class="wallet">💰 <span id="g-money">0</span> กีบ</div>
+  </header>
+  <main>
+    <div class="gtitle"><img id="g-img" alt=""><h2 id="g-name"></h2></div>
+    <div class="sec" style="margin-top:0">เลือก<span>แพ็กเกจ</span></div>
+    <div id="g-pkgs"></div>
+    <div class="obox hidden" id="o-box">
+      <p>แพ็กเกจที่เลือก: <b id="o-pkg" style="color:#fff"></b></p>
+      <input id="o-acc" placeholder="ชื่อผู้ใช้ในเกม (Roblox username)">
+      <div class="err" id="o-err"></div>
+      <button class="btn-signup" id="o-btn" onclick="submitOrder()" style="margin-top:0">✅ สั่งซื้อ</button>
+    </div>
+  </main>
+</div>
+
+<!-- หน้าประวัติคำสั่งซื้อ -->
+<div id="v-orders" class="hidden">
+  <header>
+    <button class="btn-ghost" style="width:auto;margin:0;padding:8px 14px;font-size:14px" onclick="go('v-home')">← กลับ</button>
+    <div class="wallet">💰 <span id="r-money">0</span> กีบ</div>
+  </header>
+  <main>
+    <div class="sec" style="margin-top:0">📋 ประวัติ<span>คำสั่งซื้อ</span></div>
+    <div id="orders"><p class="muted">กำลังโหลด...</p></div>
+  </main>
+</div>
+
+<!-- 4-5. หน้าโปรไฟล์ -->
+<div id="v-profile" class="hidden">
+  <header>
+    <button class="btn-ghost" style="width:auto;margin:0;padding:8px 14px;font-size:14px" onclick="go('v-home')">← กลับ</button>
+    <div class="wallet">💰 <span id="p-money">0</span> กีบ</div>
+  </header>
+  <div class="cover" id="p-cover">
+    <label class="edit">🖼️ เปลี่ยนหน้าปก<input type="file" accept="image/*" onchange="pickImage(event,'cover')"></label>
+  </div>
+  <div class="pf">
+    <img class="pf-avatar" id="p-avatar" alt="">
+    <div class="pf-name" id="p-name"></div>
+    <div class="pf-email" id="p-email"></div>
+    <div class="pf-actions">
+      <label>📷 เปลี่ยนรูปโปรไฟล์<input type="file" accept="image/*" onchange="pickImage(event,'avatar')"></label>
+      <button onclick="logout()">ออกจากระบบ</button>
+    </div>
+    <div class="namebox">
+      <label>ชื่อที่แสดง (ตั้งเองได้)</label>
+      <input id="p-input" maxlength="30" placeholder="ใส่ชื่อของคุณ">
+      <button class="btn-main" onclick="saveName()">บันทึกชื่อ</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ถ้าโหลดระบบไม่ขึ้นภายใน 6 วินาที ให้บอกสาเหตุ แทนที่จะค้างเฉยๆ */
+setTimeout(function(){
+  var l=document.getElementById('loading');
+  if(l && !l.classList.contains('hidden')){
+    l.style.textAlign='center'; l.style.padding='24px';
+    l.innerHTML='โหลดระบบไม่สำเร็จ 😕<br><br>ไฟล์นี้ต้องเปิดผ่านเว็บจริง (เช่น GitHub Pages)<br>เปิดในพรีวิวของแชทไม่ได้';
+  }
+},6000);
+</script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut }
+  from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, query, where, getDocs, serverTimestamp }
+  from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDuKUuBfJP-192nCalb_XpNmOmwfJrDX0I",
+  authDomain: "klinik-gameshop.firebaseapp.com",
+  projectId: "klinik-gameshop",
+  storageBucket: "klinik-gameshop.firebasestorage.app",
+  messagingSenderId: "824010527985",
+  appId: "1:824010527985:web:71d327a46b875775bd0550"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const DEFAULT_AVATAR = 'data:image/svg+xml;utf8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#2a2a30"/><circle cx="50" cy="38" r="18" fill="#777"/><ellipse cx="50" cy="85" rx="30" ry="22" fill="#777"/></svg>');
+const $ = id => document.getElementById(id);
+let profile = null, signingUp = false;
+
+window.go = function(id){
+  ['v-login','v-signup','v-home','v-profile','v-game','v-orders'].forEach(v => $(v).classList.toggle('hidden', v !== id));
+  if (profile && ['v-home','v-profile','v-game','v-orders'].includes(id)) render();
+  window.scrollTo(0,0);
+};
+
+function thaiError(e){
+  const m = {
+    'auth/email-already-in-use':'อีเมลนี้ถูกใช้แล้ว',
+    'auth/invalid-email':'อีเมลไม่ถูกต้อง',
+    'auth/weak-password':'รหัสผ่านต้องมีอย่างน้อย 6 ตัว',
+    'auth/invalid-credential':'อีเมลหรือรหัสผ่านไม่ถูกต้อง',
+    'auth/user-not-found':'อีเมลหรือรหัสผ่านไม่ถูกต้อง',
+    'auth/wrong-password':'อีเมลหรือรหัสผ่านไม่ถูกต้อง',
+    'auth/too-many-requests':'ลองบ่อยเกินไป รอสักครู่แล้วลองใหม่',
+    'auth/network-request-failed':'เน็ตมีปัญหา ลองใหม่อีกครั้ง',
+    'auth/operation-not-allowed':'ยังไม่ได้เปิด Email/Password ใน Firebase',
+    'permission-denied':'ยังไม่ได้ตั้งกฎ Firestore (Rules)'
+  };
+  return m[e.code] || ('เกิดข้อผิดพลาด: ' + (e.code || e.message));
+}
+
+window.doSignup = async function(){
+  const name=$('s-name').value.trim(), email=$('s-email').value.trim(),
+        p1=$('s-pass1').value, p2=$('s-pass2').value, err=$('s-err');
+  if(!name||!email||!p1||!p2) return err.textContent='กรอกให้ครบทุกช่องนะ';
+  if(p1.length<6) return err.textContent='รหัสผ่านต้องมีอย่างน้อย 6 ตัว';
+  if(p1!==p2) return err.textContent='รหัสผ่านสองครั้งไม่ตรงกัน';
+  err.textContent=''; $('s-btn').disabled=true; signingUp=true;
+  try{
+    const cred = await createUserWithEmailAndPassword(auth, email, p1);
+    profile = { name, email, money:0, avatar:'', cover:'' };
+    await setDoc(doc(db,'users',cred.user.uid), profile);
+    go('v-home');
+  }catch(e){ err.textContent = thaiError(e); }
+  signingUp=false; $('s-btn').disabled=false;
+};
+
+window.doLogin = async function(){
+  const email=$('l-user').value.trim(), pass=$('l-pass').value, err=$('l-err');
+  if(!email||!pass) return err.textContent='กรอกอีเมลและรหัสผ่านก่อนนะ';
+  err.textContent=''; $('l-btn').disabled=true;
+  try{ await signInWithEmailAndPassword(auth, email, pass); }
+  catch(e){ err.textContent = thaiError(e); }
+  $('l-btn').disabled=false;
+};
+
+window.logout = async function(){ await signOut(auth); };
+
+function render(){
+  if(!profile) return;
+  const money = Number(profile.money||0).toLocaleString('en-US');
+  const av = profile.avatar || DEFAULT_AVATAR;
+  $('h-money').textContent = money; $('p-money').textContent = money;
+  $('g-money').textContent = money; $('r-money').textContent = money;
+  renderGames();
+  $('h-avatar').src = av; $('p-avatar').src = av;
+  $('h-name').textContent = profile.name; $('p-name').textContent = profile.name;
+  $('p-email').textContent = profile.email;
+  $('p-input').value = profile.name;
+  $('p-cover').style.backgroundImage = profile.cover ? `url(${profile.cover})` : '';
+}
+
+window.saveName = async function(){
+  const n=$('p-input').value.trim(); if(!n||!auth.currentUser) return;
+  try{ await updateDoc(doc(db,'users',auth.currentUser.uid), {name:n}); profile.name=n; render(); }
+  catch(e){ alert(thaiError(e)); }
+};
+
+window.pickImage = function(e, kind){
+  const f=e.target.files[0]; if(!f||!auth.currentUser) return;
+  const r=new FileReader();
+  r.onload=()=>{
+    const img=new Image();
+    img.onload=async()=>{
+      const max = kind==='cover' ? 800 : 300, k=Math.min(1, max/Math.max(img.width,img.height));
+      const cv=document.createElement('canvas');
+      cv.width=img.width*k; cv.height=img.height*k;
+      cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
+      const data=cv.toDataURL('image/jpeg',0.7);
+      try{ await updateDoc(doc(db,'users',auth.currentUser.uid), {[kind]:data}); profile[kind]=data; render(); }
+      catch(err){ alert(thaiError(err)); }
+    };
+    img.src=r.result;
+  };
+  r.readAsDataURL(f);
+  e.target.value='';
+};
+
+/* ================= ร้านค้า =================
+   แก้ชื่อเกม แพ็กเกจ และราคา (กีบ) ได้ตรงนี้ */
+const CONTACT = "ติดต่อร้านเพื่อโอนเงิน (ใส่เบอร์/WhatsApp ของร้านตรงนี้)";
+const GAMES = [
+  { id:'blox', name:'Blox Fruits',
+    img:'https://www.image2url.com/r2/default/images/1794833988371-bf179a6a-7d80-44d9-87a7-3aa52733c682.png',
+    packages:[
+      { name:'ตัวอย่างแพ็กเกจ 1', price:50000 },
+      { name:'ตัวอย่างแพ็กเกจ 2', price:100000 },
+      { name:'ตัวอย่างแพ็กเกจ 3', price:200000 }
+    ] }
+];
+let curGame = null, curPkg = null;
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = n => Number(n).toLocaleString('en-US');
+
+function renderGames(){
+  $('games').innerHTML = GAMES.map(g =>
+    `<div class="gcard" onclick="openGame('${g.id}')"><img src="${g.img}" alt=""><div>${esc(g.name)}</div></div>`).join('');
+}
+
+window.openGame = function(id){
+  curGame = GAMES.find(g => g.id === id); curPkg = null;
+  $('g-img').src = curGame.img; $('g-name').textContent = curGame.name;
+  $('o-box').classList.add('hidden'); $('o-err').textContent=''; $('o-acc').value='';
+  $('g-pkgs').innerHTML = curGame.packages.map((p,i) =>
+    `<div class="pkg" id="pk${i}" onclick="pickPkg(${i})"><b>${esc(p.name)}</b><span class="pr">${fmt(p.price)} กีบ</span></div>`).join('');
+  go('v-game');
+};
+
+window.pickPkg = function(i){
+  curPkg = curGame.packages[i];
+  curGame.packages.forEach((_,k) => $('pk'+k).classList.toggle('sel', k===i));
+  $('o-pkg').textContent = `${curPkg.name} (${fmt(curPkg.price)} กีบ)`;
+  $('o-box').classList.remove('hidden');
+  $('o-box').scrollIntoView({behavior:'smooth'});
+};
+
+window.submitOrder = async function(){
+  const acc = $('o-acc').value.trim(), err = $('o-err');
+  if(!curPkg) return err.textContent='เลือกแพ็กเกจก่อนนะ';
+  if(!acc) return err.textContent='ใส่ชื่อผู้ใช้ในเกมก่อนนะ';
+  err.textContent=''; $('o-btn').disabled=true;
+  try{
+    await addDoc(collection(db,'orders'), {
+      uid: auth.currentUser.uid, email: profile.email,
+      game: curGame.name, package: curPkg.name, price: curPkg.price,
+      account: acc, status: 'รอดำเนินการ', createdAt: serverTimestamp()
+    });
+    alert('สั่งซื้อสำเร็จ! 🎉\n' + CONTACT);
+    openOrders();
+  }catch(e){ err.textContent = thaiError(e); }
+  $('o-btn').disabled=false;
+};
+
+window.openOrders = async function(){
+  go('v-orders'); $('orders').innerHTML='<p class="muted">กำลังโหลด...</p>';
+  try{
+    const snap = await getDocs(query(collection(db,'orders'), where('uid','==',auth.currentUser.uid)));
+    const list = snap.docs.map(d => d.data()).sort((a,b) => (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0));
+    $('orders').innerHTML = list.length ? list.map(o => {
+      const d = o.createdAt ? new Date(o.createdAt.seconds*1000).toLocaleString('th-TH') : '';
+      return `<div class="ord"><div class="top"><span>${esc(o.game)}</span><span class="st ${o.status==='สำเร็จ'?'ok':''}">${esc(o.status)}</span></div>
+        <div>${esc(o.package)} · <b style="color:var(--yellow)">${fmt(o.price)} กีบ</b></div>
+        <div class="muted">ชื่อในเกม: ${esc(o.account)}</div><div class="muted">${d}</div></div>`;
+    }).join('') : '<p class="muted">ยังไม่มีคำสั่งซื้อ</p>';
+  }catch(e){ $('orders').innerHTML = `<p class="err">${thaiError(e)}</p>`; }
+};
+
+onAuthStateChanged(auth, async (user)=>{
+  if(signingUp) return;
+  if(!user){ profile=null; $('loading').classList.add('hidden'); go('v-login'); return; }
+  try{
+    const snap = await getDoc(doc(db,'users',user.uid));
+    profile = snap.exists() ? snap.data()
+      : { name:(user.email||'').split('@')[0], email:user.email, money:0, avatar:'', cover:'' };
+    if(!snap.exists()) await setDoc(doc(db,'users',user.uid), profile);
+    $('loading').classList.add('hidden'); go('v-home');
+  }catch(e){
+    $('loading').classList.add('hidden'); go('v-login');
+    $('l-err').textContent = thaiError(e);
+  }
+});
+</script>
+</body>
+</html>
